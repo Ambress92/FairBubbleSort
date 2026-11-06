@@ -162,10 +162,19 @@ def greedy_heap_numba(s, a, tau):
     n_down = count_inversions(a)
 
     n_pairs = n * (n - 1) // 2
-    delta_star = int(np.floor((1.0 - tau) * n_pairs))
+    # Largest allowed imbalance, Delta* = floor((1 - tau) * n_pairs) as in the
+    # paper. The tolerance absorbs floating-point error in the product (e.g.
+    # (1 - 0.9) * 190 evaluates to 18.999999999999996 instead of 19).
+    thr = (1.0 - tau) * n_pairs
+    delta_star = int(np.floor(thr + 1e-9 + 1e-13 * n_pairs))
     d0 = abs(n_up - n_down)
+    # Every swap changes the imbalance by exactly 2, so the imbalance keeps the
+    # parity of d0. Stop at the largest reachable value <= Delta*, i.e. one
+    # below Delta* when the parities differ; when Delta* = 0 and d0 is odd, the
+    # best reachable imbalance is 1 (the max(., d0 mod 2) of Algorithm 1).
     if delta_star % 2 != d0 % 2:
-        delta_star += 1
+        delta_star -= 1
+    delta_star = max(delta_star, d0 % 2)
     if d0 <= delta_star:
         return 0.0, 0, n_up, n_down
 
@@ -294,10 +303,19 @@ def greedy_naive_numba(s, a, tau):
     n_down = count_inversions(a)
 
     n_pairs = n * (n - 1) // 2
-    delta_star = int(np.floor((1.0 - tau) * n_pairs))
+    # Largest allowed imbalance, Delta* = floor((1 - tau) * n_pairs) as in the
+    # paper. The tolerance absorbs floating-point error in the product (e.g.
+    # (1 - 0.9) * 190 evaluates to 18.999999999999996 instead of 19).
+    thr = (1.0 - tau) * n_pairs
+    delta_star = int(np.floor(thr + 1e-9 + 1e-13 * n_pairs))
     d0 = abs(n_up - n_down)
+    # Every swap changes the imbalance by exactly 2, so the imbalance keeps the
+    # parity of d0. Stop at the largest reachable value <= Delta*, i.e. one
+    # below Delta* when the parities differ; when Delta* = 0 and d0 is odd, the
+    # best reachable imbalance is 1 (the max(., d0 mod 2) of Algorithm 1).
     if delta_star % 2 != d0 % 2:
-        delta_star += 1
+        delta_star -= 1
+    delta_star = max(delta_star, d0 % 2)
     if d0 <= delta_star:
         return 0.0, 0
 
@@ -370,10 +388,19 @@ def greedy_unweighted_numba(a, tau):
     n_down = count_inversions(a)
 
     n_pairs = n * (n - 1) // 2
-    delta_star = int(np.floor((1.0 - tau) * n_pairs))
+    # Largest allowed imbalance, Delta* = floor((1 - tau) * n_pairs) as in the
+    # paper. The tolerance absorbs floating-point error in the product (e.g.
+    # (1 - 0.9) * 190 evaluates to 18.999999999999996 instead of 19).
+    thr = (1.0 - tau) * n_pairs
+    delta_star = int(np.floor(thr + 1e-9 + 1e-13 * n_pairs))
     d0 = abs(n_up - n_down)
+    # Every swap changes the imbalance by exactly 2, so the imbalance keeps the
+    # parity of d0. Stop at the largest reachable value <= Delta*, i.e. one
+    # below Delta* when the parities differ; when Delta* = 0 and d0 is odd, the
+    # best reachable imbalance is 1 (the max(., d0 mod 2) of Algorithm 1).
     if delta_star % 2 != d0 % 2:
-        delta_star += 1
+        delta_star -= 1
+    delta_star = max(delta_star, d0 % 2)
     if d0 <= delta_star:
         return 0
 

@@ -94,12 +94,15 @@ def greedy_heap(s, a, tau):
     _, n_up = count_concordant_merge(a)
     _, n_down = count_inversions_merge(a)
 
-    delta_star = int(math.floor((1 - tau) * n * (n - 1) / 2))
+    n_pairs = n * (n - 1) // 2
+    thr = (1 - tau) * n_pairs
+    delta_star = int(math.floor(thr + 1e-9 + 1e-13 * n_pairs))  # Delta* of the paper, with float tolerance
     d0 = abs(n_up - n_down)
-    # Parity fix: D changes by ±2 per swap, so D ≡ D0 (mod 2) always.
-    # Adjust delta_star to be reachable.
+    # Every swap changes D by exactly 2, so D keeps the parity of d0: stop at the largest
+    # reachable value <= Delta* (one below it when the parities differ; 1 if Delta* = 0, d0 odd).
     if delta_star % 2 != d0 % 2:
-        delta_star += 1
+        delta_star -= 1
+    delta_star = max(delta_star, d0 % 2)
     if d0 <= delta_star:
         return 0.0, 0
 
@@ -184,10 +187,15 @@ def greedy_naive(s, a, tau):
     _, n_up = count_concordant_merge(a)
     _, n_down = count_inversions_merge(a)
 
-    delta_star = int(math.floor((1 - tau) * n * (n - 1) / 2))
+    n_pairs = n * (n - 1) // 2
+    thr = (1 - tau) * n_pairs
+    delta_star = int(math.floor(thr + 1e-9 + 1e-13 * n_pairs))  # Delta* of the paper, with float tolerance
     d0 = abs(n_up - n_down)
+    # Every swap changes D by exactly 2, so D keeps the parity of d0: stop at the largest
+    # reachable value <= Delta* (one below it when the parities differ; 1 if Delta* = 0, d0 odd).
     if delta_star % 2 != d0 % 2:
-        delta_star += 1
+        delta_star -= 1
+    delta_star = max(delta_star, d0 % 2)
     if d0 <= delta_star:
         return 0.0, 0
 
